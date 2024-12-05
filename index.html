@@ -118,17 +118,17 @@
 
                     // Check if it's an audio or video file
                     if (file.type.startsWith('audio')) {
-                        processAudio(fileData, file);
+                        processAudio(fileData);
                     } else if (file.type.startsWith('video')) {
-                        processVideo(fileData, file);
+                        processVideo(fileData);
                     }
                 };
                 reader.readAsArrayBuffer(file);
             }
         }
 
-        // Function to process audio and apply dramatic "out-of-tune" effect
-        function processAudio(fileData, file) {
+        // Function to process audio and apply chaotic "out-of-tune" effect
+        function processAudio(fileData) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
 
@@ -136,25 +136,29 @@
                 let source = audioContext.createBufferSource();
                 source.buffer = processedAudioBuffer;
 
-                // Apply dramatic pitch shifts at random intervals across the audio data
-                let pitchShifter = audioContext.createGain();
-                source.connect(pitchShifter);
-                pitchShifter.connect(audioContext.destination);
+                // Apply extreme, random pitch shift
+                let pitchShiftNode = audioContext.createGain();
+                source.connect(pitchShiftNode);
+                pitchShiftNode.connect(audioContext.destination);
 
-                // More extreme pitch shift (between 0.3x and 3x)
-                let pitchShift = Math.random() * 2.7 + 0.3; // Random pitch shift between 0.3x to 3x
-                pitchShifter.gain.setValueAtTime(pitchShift, audioContext.currentTime);
+                // Apply more chaotic pitch and speed shifts
+                let pitchShift = Math.random() * 2 + 0.5; // Random pitch shift between 0.5x to 2.5x
+                let speedShift = Math.random() * 2 + 0.5; // Random speed shift between 0.5x to 2.5x
 
-                // Start playing the manipulated audio through the context, not the original file
+                // Apply pitch shift effect by altering playback rate (speed)
+                source.playbackRate.setValueAtTime(speedShift, audioContext.currentTime);
+                pitchShiftNode.gain.setValueAtTime(pitchShift, audioContext.currentTime);
+
+                // Start the audio source (out of tune)
                 source.start();
 
-                // Set the audio element to play the manipulated audio, but prevent autoplay
+                // Convert processed audio buffer to WAV and set as source for audio element
                 let audioBlob = bufferToWav(processedAudioBuffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
-                audioElement.src = processedAudioFile; // Set the processed file as source
+                audioElement.src = processedAudioFile; // Set the processed file as the source
 
-                // Make sure the audio element doesn't start playing automatically
-                audioElement.pause(); // Ensure no autoplay happens
+                // Ensure the audio does not play automatically (pause and let the user control it)
+                audioElement.pause();
             });
         }
 
@@ -222,18 +226,18 @@
                 downloadLink.href = processedAudioFile;
                 downloadLink.download = 'processed-audio.wav';
                 downloadLink.click();
-            } else if (processedVideoURL) {
+            } else if (processedVideoFile) {
                 // Create a downloadable link for video
                 let downloadLink = document.createElement('a');
-                downloadLink.href = processedVideoURL;
+                downloadLink.href = processedVideoFile;
                 downloadLink.download = 'processed-video.mp4';
                 downloadLink.click();
             }
         }
 
-        // Function to process video and play it
-        function processVideo(fileData, file) {
-            processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: 'video/mp4' }));
+        // Function to process video (pass-through)
+        function processVideo(fileData) {
+            let processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: 'video/mp4' }));
             videoElement.src = processedVideoURL;
         }
     </script>
