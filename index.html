@@ -167,15 +167,17 @@
 
         // Function to convert AudioBuffer to WAV
         function bufferToWav(buffer) {
-            let numChannels = buffer.numberOfChannels;
+            let numChannels = buffer.numberOfChannels; // Correctly reference the number of channels
             let sampleRate = buffer.sampleRate;
             let length = buffer.length * numChannels;
             let bufferData = new Float32Array(length);
 
+            // Collect data from all channels
             for (let channel = 0; channel < numChannels; channel++) {
                 bufferData.set(buffer.getChannelData(channel), channel * buffer.length);
             }
 
+            // Encode the buffer data to WAV format
             let wavData = encodeWAV(bufferData, sampleRate, numChannels);
             return new Blob([wavData], { type: 'audio/wav' });
         }
