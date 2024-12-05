@@ -145,13 +145,16 @@
                 let pitchShift = Math.random() * 2.7 + 0.3; // Random pitch shift between 0.3x to 3x
                 pitchShifter.gain.setValueAtTime(pitchShift, audioContext.currentTime);
 
-                // Start playing
+                // Start playing the manipulated audio through the context, not the original file
                 source.start();
 
                 // Set the audio element to play the manipulated audio, but prevent autoplay
                 let audioBlob = bufferToWav(processedAudioBuffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
-                audioElement.src = processedAudioFile; // Do not call play() automatically here
+                audioElement.src = processedAudioFile; // Set the processed file as source
+
+                // Make sure the audio element doesn't start playing automatically
+                audioElement.pause(); // Ensure no autoplay happens
             });
         }
 
@@ -166,7 +169,7 @@
                 bufferData.set(buffer.getChannelData(channel), channel * buffer.length);
             }
 
-            let wavData = encodeWAV(bufferData, sampleRate, numOfChannels);
+            let wavData = encodeWAV(bufferData, sampleRate, numChannels);
             return new Blob([wavData], { type: 'audio/wav' });
         }
 
