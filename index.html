@@ -5,42 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Out-of-Tune Audio/Video Manipulation</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-            font-family: Arial, sans-serif;
+            background-color: #c0c0c0; /* Silver background */
+            color: #333;
         }
-        input, button {
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
-        button {
-            cursor: pointer;
+        h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .upload-btn, .process-btn, .download-btn {
+            display: inline-block;
             background-color: #ff6347;
             color: white;
-            border: none;
-            border-radius: 5px;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 16px;
+            border-radius: 30px;
+            text-decoration: none;
+            cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        .upload-btn:hover, .process-btn:hover, .download-btn:hover {
             background-color: #ff4500;
+        }
+        .file-label {
+            font-size: 16px;
+            color: #333;
+            display: inline-block;
+            background-color: #4CAF50;
+            padding: 12px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+        .file-label:hover {
+            background-color: #45a049;
+        }
+        .video-container, .audio-container {
+            margin-top: 20px;
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+        }
+        .video-container video, .audio-container audio {
+            width: 100%;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Upload an Audio/Video File and Make it Out-of-Tune</h1>
-    <input type="file" id="fileInput" accept="audio/*, video/*">
-    <button onclick="processFile()">Process File</button>
-    <button onclick="downloadFile()">Download Processed File</button>
+    <div class="container">
+        <h1>Upload an Audio/Video File and Make it Out-of-Tune</h1>
+        
+        <!-- Upload File Button -->
+        <label for="fileInput" class="file-label">Choose File</label>
+        <input type="file" id="fileInput" accept="audio/*, video/*">
+        
+        <!-- Process and Download Buttons -->
+        <button class="process-btn" onclick="processFile()">Process File</button>
+        <button class="download-btn" onclick="downloadFile()">Download Processed File</button>
 
-    <audio id="audioElement" controls></audio>
-    <video id="videoElement" controls></video>
+        <!-- Media Playback -->
+        <div class="audio-container">
+            <audio id="audioElement" controls></audio>
+        </div>
+        <div class="video-container">
+            <video id="videoElement" controls></video>
+        </div>
+    </div>
 
     <script>
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
