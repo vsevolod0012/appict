@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Out-of-Tune Audio/Video Manipulation</title>
+    <title>Out-of-Tune Audio Manipulation</title>
     <style>
         * {
             box-sizing: border-box;
@@ -66,13 +66,12 @@
         .file-label:hover {
             background-color: #45a049;
         }
-        .video-container, .audio-container {
+        .audio-container {
             margin-top: 20px;
             width: 100%;
             height: auto;
-            max-height: 300px;
         }
-        .video-container video, .audio-container audio {
+        .audio-container audio {
             width: 100%;
             border-radius: 10px;
         }
@@ -80,33 +79,29 @@
 </head>
 <body>
     <div class="container">
-        <h1>Upload an Audio/Video File and Make it Out-of-Tune</h1>
+        <h1>Upload an Audio File and Make it Out-of-Tune</h1>
         
         <!-- Upload File Button -->
         <label for="fileInput" class="file-label">Choose File</label>
-        <input type="file" id="fileInput" accept="audio/*, video/*">
+        <input type="file" id="fileInput" accept="audio/*">
         
         <!-- Process and Download Buttons -->
         <button class="process-btn" onclick="processFile()">Process File</button>
         <button class="download-btn" onclick="downloadFile()">Download Processed File</button>
 
-        <!-- Media Playback -->
+        <!-- Audio Playback -->
         <div class="audio-container">
             <audio id="audioElement" controls></audio>
-        </div>
-        <div class="video-container">
-            <video id="videoElement" controls></video>
         </div>
     </div>
 
     <script>
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
         let audioElement = document.getElementById('audioElement');
-        let videoElement = document.getElementById('videoElement');
         let processedAudioBuffer = null;
         let processedAudioFile = null;
 
-        // Function to process audio/video file
+        // Function to process the audio file
         function processFile() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
@@ -116,18 +111,14 @@
                 reader.onload = function(e) {
                     const fileData = e.target.result;
 
-                    // Check if it's an audio or video file
-                    if (file.type.startsWith('audio')) {
-                        processAudio(fileData);
-                    } else if (file.type.startsWith('video')) {
-                        processVideo(fileData);
-                    }
+                    // Process the audio file
+                    processAudio(fileData);
                 };
                 reader.readAsArrayBuffer(file);
             }
         }
 
-        // Function to process audio and apply chaotic "out-of-tune" effect
+        // Function to process the audio and apply chaotic "out-of-tune" effects
         function processAudio(fileData) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
@@ -136,47 +127,40 @@
                 let source = audioContext.createBufferSource();
                 source.buffer = processedAudioBuffer;
 
-                // Apply extreme, random pitch shift
+                // Create a gain node to manipulate pitch and speed
                 let pitchShiftNode = audioContext.createGain();
                 source.connect(pitchShiftNode);
                 pitchShiftNode.connect(audioContext.destination);
 
-                // Apply random pitch and random speed variations
-                let basePitchShift = Math.random() * 3 + 0.3; // Pitch shift from 0.3x to 3x
-                let baseSpeedShift = Math.random() * 2 + 0.5; // Speed (playback rate) shift from 0.5x to 2.5x
-
-                // Apply initial pitch and speed shift
-                source.playbackRate.setValueAtTime(baseSpeedShift, audioContext.currentTime);
-                pitchShiftNode.gain.setValueAtTime(basePitchShift, audioContext.currentTime);
-
-                // Apply random, dramatic pitch shifts throughout the audio
-                let randomPitchShifts = [0.5, 1.5, 2.0, 2.5, 3.0];
-                let randomSpeedChanges = [0.3, 1.0, 1.5, 2.0];
+                // Apply extreme, random pitch and speed variations
                 let duration = processedAudioBuffer.duration;
                 let currentTime = 0;
 
+                // Randomize pitch and speed shifts
+                let randomPitchShifts = [0.1, 0.3, 0.5, 0.7, 1.2, 1.5, 2.0, 2.5, 3.0];
+                let randomSpeedChanges = [0.2, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0];
+
+                // Start processing the audio
+                source.start();
+
+                // Apply random chaotic pitch and speed variations at irregular intervals
                 while (currentTime < duration) {
-                    // Randomly shift pitch every second
                     let randomPitch = randomPitchShifts[Math.floor(Math.random() * randomPitchShifts.length)];
                     let randomSpeed = randomSpeedChanges[Math.floor(Math.random() * randomSpeedChanges.length)];
-                    let randomTime = Math.random() * 1 + 0.5; // Random time between 0.5 and 1.5 seconds
+                    let randomTime = Math.random() * 1.5 + 0.5; // Random time between 0.5s and 2s
 
                     pitchShiftNode.gain.setValueAtTime(randomPitch, audioContext.currentTime + currentTime);
                     source.playbackRate.setValueAtTime(randomSpeed, audioContext.currentTime + currentTime);
 
-                    // Increase the time for the next change
-                    currentTime += randomTime;
+                    currentTime += randomTime; // Increase time for the next change
                 }
-
-                // Start the audio source (out of tune)
-                source.start();
 
                 // Convert processed audio buffer to WAV and set as source for audio element
                 let audioBlob = bufferToWav(processedAudioBuffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
                 audioElement.src = processedAudioFile; // Set the processed file as the source
 
-                // Ensure the audio does not play automatically (pause and let the user control it)
+                // Pause the audio initially (so it does not auto-play)
                 audioElement.pause();
             });
         }
@@ -247,12 +231,6 @@
                 downloadLink.download = 'processed-audio.wav';
                 downloadLink.click();
             }
-        }
-
-        // Function to process video (pass-through)
-        function processVideo(fileData) {
-            let processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: 'video/mp4' }));
-            videoElement.src = processedVideoURL;
         }
     </script>
 </body>
