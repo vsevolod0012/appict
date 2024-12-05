@@ -128,7 +128,7 @@
             }
         }
 
-        // Function to process audio and apply "out-of-tune" effect by modifying individual notes
+        // Function to process audio and apply more extreme "out-of-tune" effect
         function processAudio(fileData, file) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
@@ -142,17 +142,16 @@
                 source.connect(pitchShifter);
                 pitchShifter.connect(audioContext.destination);
 
-                // Apply a random "out-of-tune" effect on frequencies (distorting the pitch)
-                let pitchShift = Math.random() * 0.3 + 0.7; // Random pitch shift between 0.7x to 1.0x (down)
+                // Apply a more extreme pitch shift (from 0.5x to 2.5x)
+                let pitchShift = Math.random() * 2 + 0.5; // Random pitch shift between 0.5x to 2.5x
                 pitchShifter.gain.setValueAtTime(pitchShift, audioContext.currentTime);
 
                 source.start();
 
-                // Set the audio element to play the manipulated audio
+                // Set the audio element to play the manipulated audio, but prevent autoplay
                 let audioBlob = bufferToWav(processedAudioBuffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
-                audioElement.src = processedAudioFile;
-                audioElement.play();
+                audioElement.src = processedAudioFile; // Do not call play() automatically here
             });
         }
 
