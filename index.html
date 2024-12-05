@@ -167,12 +167,12 @@
 
         // Function to convert AudioBuffer to WAV
         function bufferToWav(buffer) {
-            let numOfChannels = buffer.numberOfChannels;
+            let numChannels = buffer.numberOfChannels;
             let sampleRate = buffer.sampleRate;
-            let length = buffer.length * numOfChannels;
+            let length = buffer.length * numChannels;
             let bufferData = new Float32Array(length);
 
-            for (let channel = 0; channel < numOfChannels; channel++) {
+            for (let channel = 0; channel < numChannels; channel++) {
                 bufferData.set(buffer.getChannelData(channel), channel * buffer.length);
             }
 
@@ -223,7 +223,7 @@
             }
         }
 
-        // Function to download processed file
+        // Function to download the processed audio
         function downloadFile() {
             if (processedAudioFile) {
                 let downloadLink = document.createElement('a');
