@@ -141,13 +141,32 @@
                 source.connect(pitchShiftNode);
                 pitchShiftNode.connect(audioContext.destination);
 
-                // Apply more chaotic pitch and speed shifts
-                let pitchShift = Math.random() * 2 + 0.5; // Random pitch shift between 0.5x to 2.5x
-                let speedShift = Math.random() * 2 + 0.5; // Random speed shift between 0.5x to 2.5x
+                // Apply random pitch and random speed variations
+                let basePitchShift = Math.random() * 3 + 0.3; // Pitch shift from 0.3x to 3x
+                let baseSpeedShift = Math.random() * 2 + 0.5; // Speed (playback rate) shift from 0.5x to 2.5x
 
-                // Apply pitch shift effect by altering playback rate (speed)
-                source.playbackRate.setValueAtTime(speedShift, audioContext.currentTime);
-                pitchShiftNode.gain.setValueAtTime(pitchShift, audioContext.currentTime);
+                // Apply initial pitch and speed shift
+                source.playbackRate.setValueAtTime(baseSpeedShift, audioContext.currentTime);
+                pitchShiftNode.gain.setValueAtTime(basePitchShift, audioContext.currentTime);
+
+                // Apply random, dramatic pitch shifts throughout the audio
+                let randomPitchShifts = [0.5, 1.5, 2.0, 2.5, 3.0];
+                let randomSpeedChanges = [0.3, 1.0, 1.5, 2.0];
+                let duration = processedAudioBuffer.duration;
+                let currentTime = 0;
+
+                while (currentTime < duration) {
+                    // Randomly shift pitch every second
+                    let randomPitch = randomPitchShifts[Math.floor(Math.random() * randomPitchShifts.length)];
+                    let randomSpeed = randomSpeedChanges[Math.floor(Math.random() * randomSpeedChanges.length)];
+                    let randomTime = Math.random() * 1 + 0.5; // Random time between 0.5 and 1.5 seconds
+
+                    pitchShiftNode.gain.setValueAtTime(randomPitch, audioContext.currentTime + currentTime);
+                    source.playbackRate.setValueAtTime(randomSpeed, audioContext.currentTime + currentTime);
+
+                    // Increase the time for the next change
+                    currentTime += randomTime;
+                }
 
                 // Start the audio source (out of tune)
                 source.start();
@@ -203,34 +222,29 @@
             return buffer;
         }
 
-        // Function to write string to DataView
-        function writeString(view, offset, str) {
-            for (let i = 0; i < str.length; i++) {
-                view.setUint8(offset + i, str.charCodeAt(i));
+        // Function to write the string in WAV format
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
             }
         }
 
-        // Function to convert float samples to 16-bit PCM
+        // Function to convert float32 samples to 16-bit PCM
         function floatTo16BitPCM(view, offset, samples) {
-            for (let i = 0; i < samples.length; i++, offset += 2) {
-                let s = Math.max(-1, Math.min(1, samples[i]));
-                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            let i = 0;
+            let sample;
+            for (i = 0; i < samples.length; i++, offset += 2) {
+                sample = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
             }
         }
 
-        // Function to download processed file (audio or video)
+        // Function to download processed file
         function downloadFile() {
             if (processedAudioFile) {
-                // Create a downloadable link for audio
                 let downloadLink = document.createElement('a');
                 downloadLink.href = processedAudioFile;
                 downloadLink.download = 'processed-audio.wav';
-                downloadLink.click();
-            } else if (processedVideoFile) {
-                // Create a downloadable link for video
-                let downloadLink = document.createElement('a');
-                downloadLink.href = processedVideoFile;
-                downloadLink.download = 'processed-video.mp4';
                 downloadLink.click();
             }
         }
