@@ -104,7 +104,6 @@
         let audioElement = document.getElementById('audioElement');
         let videoElement = document.getElementById('videoElement');
         let processedAudioBuffer = null;
-        let processedVideoURL = null;
         let processedAudioFile = null;
 
         // Function to process audio/video file
@@ -128,7 +127,7 @@
             }
         }
 
-        // Function to process audio and apply more extreme "out-of-tune" effect
+        // Function to process audio and apply dramatic "out-of-tune" effect
         function processAudio(fileData, file) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
@@ -137,15 +136,16 @@
                 let source = audioContext.createBufferSource();
                 source.buffer = processedAudioBuffer;
 
-                // Create a pitch-shifting effect by modifying individual frequencies of the audio signal
+                // Apply dramatic pitch shifts at random intervals across the audio data
                 let pitchShifter = audioContext.createGain();
                 source.connect(pitchShifter);
                 pitchShifter.connect(audioContext.destination);
 
-                // Apply a more extreme pitch shift (from 0.5x to 2.5x)
-                let pitchShift = Math.random() * 2 + 0.5; // Random pitch shift between 0.5x to 2.5x
+                // More extreme pitch shift (between 0.3x and 3x)
+                let pitchShift = Math.random() * 2.7 + 0.3; // Random pitch shift between 0.3x to 3x
                 pitchShifter.gain.setValueAtTime(pitchShift, audioContext.currentTime);
 
+                // Start playing
                 source.start();
 
                 // Set the audio element to play the manipulated audio, but prevent autoplay
@@ -226,6 +226,12 @@
                 downloadLink.download = 'processed-video.mp4';
                 downloadLink.click();
             }
+        }
+
+        // Function to process video and play it
+        function processVideo(fileData, file) {
+            processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: 'video/mp4' }));
+            videoElement.src = processedVideoURL;
         }
     </script>
 </body>
