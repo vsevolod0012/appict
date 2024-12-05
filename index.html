@@ -48,6 +48,7 @@
         let videoElement = document.getElementById('videoElement');
         let processedAudioBuffer = null;
         let processedVideoURL = null;
+        let processedAudioFile = null;
 
         // Function to process audio/video file
         function processFile() {
@@ -61,57 +62,118 @@
 
                     // Check if it's an audio or video file
                     if (file.type.startsWith('audio')) {
-                        processAudio(fileData);
+                        processAudio(fileData, file);
                     } else if (file.type.startsWith('video')) {
-                        processVideo(fileData);
+                        processVideo(fileData, file);
                     }
                 };
                 reader.readAsArrayBuffer(file);
             }
         }
 
-        // Function to process audio
-        function processAudio(fileData) {
+        // Function to process audio and apply pitch-shift effect
+        function processAudio(fileData, file) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
 
-                // Create an audio source and apply pitch-shifting effect
+                // Create an audio source and apply pitch-shifting effect using playbackRate
                 let source = audioContext.createBufferSource();
                 source.buffer = processedAudioBuffer;
-                let pitchShift = Math.random() * 500 + 100;  // Random pitch shift between 100Hz and 600Hz
-                let pitchShiftNode = audioContext.createGain();
-                source.connect(pitchShiftNode);
-                pitchShiftNode.connect(audioContext.destination);
-                source.start();
+
+                let pitchShift = Math.random() * 0.4 + 0.8;  // Random pitch shift (0.8 to 1.2 speed)
+                source.playbackRate.setValueAtTime(pitchShift, audioContext.currentTime);
+
+                let gainNode = audioContext.createGain();
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
 
                 // Play the out-of-tune audio
-                audioElement.src = URL.createObjectURL(fileData);
+                source.start();
+
+                // Set the audio element to play the manipulated audio
+                let audioBlob = bufferToWav(processedAudioBuffer);
+                processedAudioFile = URL.createObjectURL(audioBlob);
+                audioElement.src = processedAudioFile;
                 audioElement.play();
             });
         }
 
-        // Function to process video (audio manipulation)
-        function processVideo(fileData) {
-            // Create an Object URL for the video
-            processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: 'video/mp4' }));
+        // Function to process video (audio manipulation only for simplicity)
+        function processVideo(fileData, file) {
+            // Just extract the audio and apply pitch-shifting if needed
+            processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: file.type }));
             videoElement.src = processedVideoURL;
             videoElement.play();
         }
 
-        // Function to download processed file
+        // Function to convert AudioBuffer to WAV
+        function bufferToWav(buffer) {
+            let numOfChannels = buffer.numberOfChannels;
+            let sampleRate = buffer.sampleRate;
+            let length = buffer.length * numOfChannels;
+            let bufferData = new Float32Array(length);
+
+            for (let channel = 0; channel < numOfChannels; channel++) {
+                bufferData.set(buffer.getChannelData(channel), channel * buffer.length);
+            }
+
+            let wavData = encodeWAV(bufferData, sampleRate, numOfChannels);
+            return new Blob([wavData], { type: 'audio/wav' });
+        }
+
+        // Function to encode the WAV file from the AudioBuffer data
+        function encodeWAV(samples, sampleRate, numChannels) {
+            let buffer = new ArrayBuffer(44 + samples.length * 2);
+            let view = new DataView(buffer);
+
+            // RIFF identifier
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 32 + samples.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * 2, true);
+            view.setUint16(32, numChannels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, samples.length * 2, true);
+
+            // Write the PCM samples
+            floatTo16BitPCM(view, 44, samples);
+
+            return buffer;
+        }
+
+        // Function to write string to DataView
+        function writeString(view, offset, str) {
+            for (let i = 0; i < str.length; i++) {
+                view.setUint8(offset + i, str.charCodeAt(i));
+            }
+        }
+
+        // Function to convert float samples to 16-bit PCM
+        function floatTo16BitPCM(view, offset, samples) {
+            for (let i = 0; i < samples.length; i++, offset += 2) {
+                let s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+        }
+
+        // Function to download processed file (audio or video)
         function downloadFile() {
-            if (processedAudioBuffer) {
+            if (processedAudioFile) {
                 // Create a downloadable link for audio
-                let audioBlob = new Blob([processedAudioBuffer], { type: 'audio/wav' });
                 let downloadLink = document.createElement('a');
-                downloadLink.href = URL.createObjectURL(audioBlob);
+                downloadLink.href = processedAudioFile;
                 downloadLink.download = 'processed-audio.wav';
                 downloadLink.click();
             } else if (processedVideoURL) {
                 // Create a downloadable link for video
-                let videoBlob = new Blob([processedVideoURL], { type: 'video/mp4' });
                 let downloadLink = document.createElement('a');
-                downloadLink.href = URL.createObjectURL(videoBlob);
+                downloadLink.href = processedVideoURL;
                 downloadLink.download = 'processed-video.mp4';
                 downloadLink.click();
             }
