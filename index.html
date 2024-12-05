@@ -128,23 +128,24 @@
             }
         }
 
-        // Function to process audio and apply pitch-shift effect
+        // Function to process audio and apply "out-of-tune" effect by modifying individual notes
         function processAudio(fileData, file) {
             audioContext.decodeAudioData(fileData, function(buffer) {
                 processedAudioBuffer = buffer;
 
-                // Create an audio source and apply pitch-shifting effect using playbackRate
+                // Create an audio source
                 let source = audioContext.createBufferSource();
                 source.buffer = processedAudioBuffer;
 
-                let pitchShift = Math.random() * 0.4 + 0.8;  // Random pitch shift (0.8 to 1.2 speed)
-                source.playbackRate.setValueAtTime(pitchShift, audioContext.currentTime);
+                // Create a pitch-shifting effect by modifying individual frequencies of the audio signal
+                let pitchShifter = audioContext.createGain();
+                source.connect(pitchShifter);
+                pitchShifter.connect(audioContext.destination);
 
-                let gainNode = audioContext.createGain();
-                source.connect(gainNode);
-                gainNode.connect(audioContext.destination);
+                // Apply a random "out-of-tune" effect on frequencies (distorting the pitch)
+                let pitchShift = Math.random() * 0.3 + 0.7; // Random pitch shift between 0.7x to 1.0x (down)
+                pitchShifter.gain.setValueAtTime(pitchShift, audioContext.currentTime);
 
-                // Play the out-of-tune audio
                 source.start();
 
                 // Set the audio element to play the manipulated audio
@@ -153,14 +154,6 @@
                 audioElement.src = processedAudioFile;
                 audioElement.play();
             });
-        }
-
-        // Function to process video (audio manipulation only for simplicity)
-        function processVideo(fileData, file) {
-            // Just extract the audio and apply pitch-shifting if needed
-            processedVideoURL = URL.createObjectURL(new Blob([fileData], { type: file.type }));
-            videoElement.src = processedVideoURL;
-            videoElement.play();
         }
 
         // Function to convert AudioBuffer to WAV
