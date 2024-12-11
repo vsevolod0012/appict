@@ -17,6 +17,7 @@
             font-family: 'Times New Roman';
             src: url('./times new roman.ttf') format('truetype');
         }
+        
         body {
             margin: 0;
             padding: 0;
@@ -26,62 +27,67 @@
             height: 100vh;
             background-color: #A0A0A0; /* Light gray background */
         }
+
         .container {
-            width: 360px;
-            height: 720px;
+            width: 375px;
+            height: 667px;
             background-color: #D3D3D3; /* Silver background */
             border-radius: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 10px;
+            padding: 0;
             box-sizing: border-box;
-            text-align: center;
+            position: relative;
         }
+
         h1 {
             font-family: 'Lancelot', serif;
             font-size: 36px;
             color: #0033A0; /* Dark Blue */
-            margin-top: 10px;
-            margin-bottom: 40px;
+            margin: 40px 0 20px 0;
         }
+
         button {
-            width: 80%;
-            max-width: 280px;
+            width: 220px;
             height: 50px;
             font-family: 'Boston Angel', sans-serif;
-            font-size: 18px;
+            font-size: 22px;
             background-color: #4CAF50; /* Green */
             color: #000000; /* Black text */
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
             margin: 10px 0;
             transition: 0.3s ease;
         }
+
         button:hover {
             background-color: #45a049; /* Darker green */
         }
-        audio {
-            width: 90%;
-            margin-top: 30px;
-            border-radius: 10px;
+
+        .audio-container {
+            width: 310px;
+            position: absolute;
+            bottom: 40px;
         }
-        input[type="file"] {
-            display: none; /* Hidden for custom button */
+
+        audio {
+            width: 100%;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>MusTune</h1>
-        <!-- Buttons -->
         <button onclick="document.getElementById('fileInput').click()">Import Audio</button>
-        <input type="file" id="fileInput" accept="audio/*">
+        <input type="file" id="fileInput" accept="audio/*" style="display:none;">
         <button onclick="downloadFile()">Download</button>
         <button onclick="processFile()">Ruin Audio</button>
-        <!-- Audio Player -->
-        <audio id="audioElement" controls></audio>
+        <div class="audio-container">
+            <audio id="audioElement" controls></audio>
+        </div>
     </div>
 
     <script>
