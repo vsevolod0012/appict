@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Out-of-Tune Audio Manipulation</title>
+    <title>MusTune - Audio Manipulation</title>
     <style>
-        * {
-            box-sizing: border-box;
-        }
         body {
-            font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -17,179 +13,112 @@
             justify-content: center;
             align-items: center;
             background-color: #c0c0c0; /* Silver background */
-            color: #333;
         }
         .container {
             width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 360px;
+            height: 640px;
+            background-color: #c0c0c0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            box-sizing: border-box;
             text-align: center;
         }
         h1 {
-            font-size: 24px;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            color: #0033A0; /* Dark blue */
+            margin-top: 20px;
+            margin-bottom: 30px;
         }
-        input[type="file"] {
-            display: none;
-        }
-        .upload-btn, .process-btn, .download-btn {
-            display: inline-block;
-            background-color: #ff6347;
+        button {
+            background-color: #4CAF50; /* Green */
             color: white;
-            padding: 15px 30px;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
             margin: 10px;
-            font-size: 16px;
-            border-radius: 30px;
-            text-decoration: none;
+            font-size: 18px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            width: 80%;
+            max-width: 280px;
+            text-align: center;
+            transition: 0.3s ease;
         }
-        .upload-btn:hover, .process-btn:hover, .download-btn:hover {
-            background-color: #ff4500;
+        button:hover {
+            background-color: #45a049; /* Darker green */
         }
-        .file-label {
-            font-size: 16px;
-            color: #333;
-            display: inline-block;
-            background-color: #4CAF50;
-            padding: 12px 24px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-        }
-        .file-label:hover {
-            background-color: #45a049;
-        }
-        .audio-container {
-            margin-top: 20px;
-            width: 100%;
-            height: auto;
-        }
-        .audio-container audio {
-            width: 100%;
+        audio {
+            width: 90%;
+            margin-top: 30px;
             border-radius: 10px;
+        }
+        #fileInput {
+            display: none; /* Hidden for custom UI */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Upload an Audio File and Make it Out-of-Tune</h1>
-        
-        <!-- Upload File Button -->
-        <label for="fileInput" class="file-label">Choose File</label>
+        <h1>MusTune</h1>
+        <!-- Buttons -->
+        <button onclick="document.getElementById('fileInput').click()">Import Audio</button>
         <input type="file" id="fileInput" accept="audio/*">
-        
-        <!-- Process and Download Buttons -->
-        <button class="process-btn" onclick="processFile()">Process File</button>
-        <button class="download-btn" onclick="downloadFile()">Download Processed File</button>
-
-        <!-- Audio Playback -->
-        <div class="audio-container">
-            <audio id="audioElement" controls></audio>
-        </div>
+        <button onclick="processFile()">Download</button>
+        <button onclick="processFile()">Ruin Audio</button>
+        <!-- Audio Player -->
+        <audio id="audioElement" controls></audio>
     </div>
 
     <script>
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
         let audioElement = document.getElementById('audioElement');
-        let processedAudioBuffer = null;
         let processedAudioFile = null;
 
-        // Function to process the audio file
-        function processFile() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-
+        // Function to handle file import and process
+        document.getElementById('fileInput').addEventListener('change', function () {
+            const file = this.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const fileData = e.target.result;
-
-                    // Process the audio file
-                    processAudio(fileData);
+                    processAudio(fileData); // Process audio
                 };
                 reader.readAsArrayBuffer(file);
             }
-        }
+        });
 
-        // Function to process the audio and apply chaotic "out-of-tune" effects
         function processAudio(fileData) {
-            audioContext.decodeAudioData(fileData, function(buffer) {
-                processedAudioBuffer = buffer;
-
-                // Create an audio source
-                let source = audioContext.createBufferSource();
-                source.buffer = processedAudioBuffer;
-
-                // Create a gain node to manipulate pitch and speed
-                let pitchShiftNode = audioContext.createGain();
-                source.connect(pitchShiftNode);
-                pitchShiftNode.connect(audioContext.destination);
-
-                // Apply extreme, random pitch and speed variations
-                let duration = processedAudioBuffer.duration;
-                let currentTime = 0;
-
-                // Randomize pitch and speed shifts
-                let randomPitchShifts = [0.1, 0.3, 0.5, 0.7, 1.2, 1.5, 2.0, 2.5, 3.0];
-                let randomSpeedChanges = [0.2, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0];
-
-                // Start processing the audio
-                source.start();
-
-                // Apply random chaotic pitch and speed variations at irregular intervals
-                while (currentTime < duration) {
-                    let randomPitch = randomPitchShifts[Math.floor(Math.random() * randomPitchShifts.length)];
-                    let randomSpeed = randomSpeedChanges[Math.floor(Math.random() * randomSpeedChanges.length)];
-                    let randomTime = Math.random() * 1.5 + 0.5; // Random time between 0.5s and 2s
-
-                    pitchShiftNode.gain.setValueAtTime(randomPitch, audioContext.currentTime + currentTime);
-                    source.playbackRate.setValueAtTime(randomSpeed, audioContext.currentTime + currentTime);
-
-                    currentTime += randomTime; // Increase time for the next change
-                }
-
-                // Convert processed audio buffer to WAV and set as source for audio element
-                let audioBlob = bufferToWav(processedAudioBuffer);
+            audioContext.decodeAudioData(fileData, (buffer) => {
+                // Manipulate the buffer (e.g., apply "ruin" effect)
+                const audioBlob = bufferToWav(buffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
-                audioElement.src = processedAudioFile; // Set the processed file as the source
-
-                // Pause the audio initially (so it does not auto-play)
-                audioElement.pause();
+                audioElement.src = processedAudioFile; // Load processed audio into the player
             });
         }
 
-        // Function to convert AudioBuffer to WAV
         function bufferToWav(buffer) {
-            let numChannels = buffer.numberOfChannels; // Correctly reference the number of channels
-            let sampleRate = buffer.sampleRate;
+            let numChannels = buffer.numberOfChannels;
             let length = buffer.length * numChannels;
-            let bufferData = new Float32Array(length);
+            let sampleRate = buffer.sampleRate;
+            let audioData = new Float32Array(length);
 
-            // Collect data from all channels
-            for (let channel = 0; channel < numChannels; channel++) {
-                bufferData.set(buffer.getChannelData(channel), channel * buffer.length);
+            for (let i = 0; i < numChannels; i++) {
+                audioData.set(buffer.getChannelData(i), i * buffer.length);
             }
 
-            // Encode the buffer data to WAV format
-            let wavData = encodeWAV(bufferData, sampleRate, numChannels);
-            return new Blob([wavData], { type: 'audio/wav' });
+            let wav = encodeWAV(audioData, sampleRate, numChannels);
+            return new Blob([wav], { type: 'audio/wav' });
         }
 
-        // Function to encode the WAV file from the AudioBuffer data
         function encodeWAV(samples, sampleRate, numChannels) {
-            let buffer = new ArrayBuffer(44 + samples.length * 2);
-            let view = new DataView(buffer);
+            const buffer = new ArrayBuffer(44 + samples.length * 2);
+            const view = new DataView(buffer);
 
-            // RIFF identifier
             writeString(view, 0, 'RIFF');
-            view.setUint32(4, 32 + samples.length * 2, true);
+            view.setUint32(4, 36 + samples.length * 2, true);
             writeString(view, 8, 'WAVE');
             writeString(view, 12, 'fmt ');
             view.setUint32(16, 16, true);
@@ -201,37 +130,30 @@
             view.setUint16(34, 16, true);
             writeString(view, 36, 'data');
             view.setUint32(40, samples.length * 2, true);
-
-            // Write the PCM samples
             floatTo16BitPCM(view, 44, samples);
 
             return buffer;
         }
 
-        // Function to write the string in WAV format
         function writeString(view, offset, string) {
             for (let i = 0; i < string.length; i++) {
                 view.setUint8(offset + i, string.charCodeAt(i));
             }
         }
 
-        // Function to convert float32 samples to 16-bit PCM
         function floatTo16BitPCM(view, offset, samples) {
-            let i = 0;
-            let sample;
-            for (i = 0; i < samples.length; i++, offset += 2) {
-                sample = Math.max(-1, Math.min(1, samples[i]));
-                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+            for (let i = 0; i < samples.length; i++, offset += 2) {
+                const s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
             }
         }
 
-        // Function to download the processed audio
         function downloadFile() {
             if (processedAudioFile) {
-                let downloadLink = document.createElement('a');
-                downloadLink.href = processedAudioFile;
-                downloadLink.download = 'processed-audio.wav';
-                downloadLink.click();
+                const a = document.createElement('a');
+                a.href = processedAudioFile;
+                a.download = 'processed-audio.wav';
+                a.click();
             }
         }
     </script>
