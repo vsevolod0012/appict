@@ -51,19 +51,26 @@
         button {
             width: 220px;
             height: 50px;
-            font-family: 'Boston Angel', sans-serif;
-            font-size: 22px;
-            background-color: #4CAF50; /* Green */
-            color: #000000; /* Black text */
+            background-color: transparent;
             border: none;
-            border-radius: 25px;
             cursor: pointer;
             margin: 10px 0;
             transition: 0.3s ease;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         button:hover {
-            background-color: #45a049; /* Darker green */
+            opacity: 0.8;
+        }
+
+        button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ensure the image fits within the button size */
+            border-radius: 25px;
         }
 
         .audio-container {
@@ -81,10 +88,16 @@
 <body>
     <div class="container">
         <h1>MusTune</h1>
-        <button onclick="document.getElementById('fileInput').click()">Import Audio</button>
+        <button onclick="document.getElementById('fileInput').click()">
+            <img src="./importaudio.png" alt="Import Audio">
+        </button>
         <input type="file" id="fileInput" accept="audio/*" style="display:none;">
-        <button onclick="downloadFile()">Download</button>
-        <button onclick="processFile()">Ruin Audio</button>
+        <button onclick="downloadFile()">
+            <img src="./download.png" alt="Download">
+        </button>
+        <button onclick="processFile()">
+            <img src="./ruinaudio.png" alt="Ruin Audio">
+        </button>
         <div class="audio-container">
             <audio id="audioElement" controls></audio>
         </div>
@@ -138,6 +151,7 @@
             view.setUint32(4, 36 + samples.length * 2, true);
             writeString(view, 8, 'WAVE');
             writeString(view, 12, 'fmt ');
+
             view.setUint32(16, 16, true);
             view.setUint16(20, 1, true);
             view.setUint16(22, numChannels, true);
@@ -145,6 +159,7 @@
             view.setUint32(28, sampleRate * numChannels * 2, true);
             view.setUint16(32, numChannels * 2, true);
             view.setUint16(34, 16, true);
+
             writeString(view, 36, 'data');
             view.setUint32(40, samples.length * 2, true);
             floatTo16BitPCM(view, 44, samples);
