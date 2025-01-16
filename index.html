@@ -26,6 +26,7 @@
             align-items: center;
             height: 100vh;
             background-color: #a6a6a6; /* Light gray background */
+            position: relative; /* Add this for absolute positioning of watermark */
         }
 
         .container {
@@ -82,6 +83,15 @@
             width: 100%;
             border-radius: 10px;
         }
+
+        /* Watermark Styling */
+        .watermark {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 100px; /* Adjust the size of the watermark */
+            opacity: 0.5; /* Optional: Makes the watermark semi-transparent */
+        }
     </style>
 </head>
 <body>
@@ -101,6 +111,9 @@
             <audio id="audioElement" controls></audio>
         </div>
     </div>
+
+    <!-- Watermark Image -->
+    <img src="./watermark.png" alt="Watermark" class="watermark">
 
     <script>
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
