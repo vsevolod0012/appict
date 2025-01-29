@@ -24,9 +24,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #a6a6a6; /* Light gray background */
-            position: relative; /* Add this for absolute positioning of watermark */
+            min-height: 100vh;
+            background: url('./app-background.png') repeat;
+            background-size: auto; /* Keeps original size */
         }
 
         .container {
@@ -43,8 +43,8 @@
         }
 
         .title-img {
-            width: 220px;  /* Set width to match the original size of the title */
-            height: auto;  /* Maintain the aspect ratio */
+            width: 220px;
+            height: auto;
             margin: 40px 0 20px 0;
         }
 
@@ -69,7 +69,7 @@
         button img {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* Ensure the image fits within the button size */
+            object-fit: contain;
             border-radius: 25px;
         }
 
@@ -86,11 +86,11 @@
 
         /* Watermark Styling */
         .watermark {
-            position: fixed; /* Fixed position relative to the viewport */
-            top: 10px;  /* Distance from the top */
-            right: 10px;  /* Distance from the right */
-            width: 100px; /* Adjust the size of the watermark */
-            opacity: 0.5; /* Optional: Makes the watermark semi-transparent */
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 100px;
+            opacity: 0.5;
         }
     </style>
 </head>
@@ -112,7 +112,6 @@
         </div>
     </div>
 
-    <!-- Watermark Image -->
     <img src="./watermark.png" alt="Watermark" class="watermark">
 
     <script>
@@ -120,7 +119,6 @@
         let audioElement = document.getElementById('audioElement');
         let processedAudioFile = null;
 
-        // Handle file input change
         document.getElementById('fileInput').addEventListener('change', function () {
             const file = this.files[0];
             if (file) {
@@ -137,7 +135,7 @@
             audioContext.decodeAudioData(fileData, (buffer) => {
                 const audioBlob = bufferToWav(buffer);
                 processedAudioFile = URL.createObjectURL(audioBlob);
-                audioElement.src = processedAudioFile; // Load processed audio into the player
+                audioElement.src = processedAudioFile;
             });
         }
 
